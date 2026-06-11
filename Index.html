@@ -1,0 +1,2075 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZMFRESHMART - Sistem Penggajian & Omset</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printArea, #printArea * {
+                visibility: visible;
+            }
+            #printArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginPage" class="flex-1 flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-white text-2xl shadow-lg shadow-blue-200">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-slate-900">ZMFRESHMART</h1>
+                <p class="text-slate-500 text-sm mt-1">Sistem Penggajian & Omset</p>
+            </div>
+
+            <!-- Toast Alert inside Login -->
+            <div id="loginAlert" class="hidden mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm flex items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span id="loginAlertMsg">Username atau password salah.</span>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="username" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm" placeholder="Masukkan username">
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="password" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm" placeholder="••••••••">
+                    </div>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Akses Sebagai</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="border border-slate-200 rounded-xl p-3 flex items-center justify-center gap-2 cursor-pointer hover:bg-slate-50 transition-all [&:has(input:checked)]:border-blue-600 [&:has(input:checked)]:bg-blue-50">
+                            <input type="radio" name="loginRole" value="admin" checked class="text-blue-600 focus:ring-blue-500">
+                            <span class="text-sm font-medium text-slate-700">Admin</span>
+                        </label>
+                        <label class="border border-slate-200 rounded-xl p-3 flex items-center justify-center gap-2 cursor-pointer hover:bg-slate-50 transition-all [&:has(input:checked)]:border-blue-600 [&:has(input:checked)]:bg-blue-50">
+                            <input type="radio" name="loginRole" value="karyawan" class="text-blue-600 focus:ring-blue-500">
+                            <span class="text-sm font-medium text-slate-700">Karyawan</span>
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl shadow-lg shadow-blue-200 transition-all text-sm flex items-center justify-center gap-2">
+                    <span>Masuk Aplikasi</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+            
+            <div class="mt-6 pt-6 border-t border-slate-100 text-center">
+                <span class="text-xs text-slate-400">Hubungi Admin jika Anda lupa password login.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- APP WRAPPER (HIDDEN ON START) -->
+    <div id="appPage" class="hidden flex-1 flex flex-col md:flex-row min-h-screen">
+        
+        <!-- SIDEBAR -->
+        <aside class="w-full md:w-64 bg-slate-900 text-slate-400 flex flex-col z-20 shadow-xl">
+            <!-- Header Brand -->
+            <div class="p-6 border-b border-slate-800 flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white text-lg font-bold">
+                    <i class="fa-solid fa-store"></i>
+                </div>
+                <div>
+                    <h2 class="text-white font-bold text-sm leading-none">ZMFRESHMART</h2>
+                    <span class="text-xs text-blue-500 font-semibold" id="userRoleBadge">ADMIN PANEL</span>
+                </div>
+            </div>
+
+            <!-- Navigasi -->
+            <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto" id="sidebarMenu">
+                <!-- Menu Admin & Karyawan (Dinamis) -->
+            </nav>
+
+            <!-- Profil User & Logout -->
+            <div class="p-4 border-t border-slate-800 bg-slate-950/50">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-white text-xs font-bold" id="avatarName">
+                        A
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-xs text-white font-semibold truncate" id="loggedInUserName">Administrator</p>
+                        <p class="text-[10px] text-slate-500 truncate" id="loggedInUserDetail">admin@zmfreshmart.com</p>
+                    </div>
+                </div>
+                <button onclick="handleLogout()" class="w-full bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white text-xs font-semibold py-2 px-3 rounded-lg transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Keluar Akun</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 flex flex-col min-h-0 bg-slate-50 overflow-y-auto">
+            
+            <!-- TOP BAR / HEADER -->
+            <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+                <div>
+                    <h1 class="text-xl font-bold text-slate-900" id="currentMenuTitle">Dashboard</h1>
+                    <p class="text-xs text-slate-500" id="currentMenuDesc">Overview statistik dan ringkasan data penggajian.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <!-- Status Sinkronisasi Sheet -->
+                    <div id="syncStatus" class="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full text-xs text-green-600 font-semibold">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        <span id="syncText">Tersinkron Sheet</span>
+                    </div>
+                    <button onclick="syncDataFromSheet()" title="Sinkronisasi Manual" class="p-2 text-slate-500 hover:text-blue-600 bg-slate-100 hover:bg-blue-50 rounded-lg transition-all">
+                        <i class="fa-solid fa-arrows-rotate" id="syncBtnIcon"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- CONTAINER MENUS -->
+            <div class="p-6 flex-1">
+                
+                <!-- ALERT GLOBAL -->
+                <div id="globalToast" class="hidden fixed bottom-5 right-5 z-50 max-w-sm bg-white border border-slate-100 rounded-xl shadow-2xl p-4 flex items-start gap-3 transition-all transform translate-y-0">
+                    <div id="toastIconBg" class="w-8 h-8 rounded-lg flex items-center justify-center text-white">
+                        <i id="toastIcon" class="fa-solid"></i>
+                    </div>
+                    <div>
+                        <h4 id="toastTitle" class="text-sm font-bold text-slate-900">Sukses!</h4>
+                        <p id="toastMessage" class="text-xs text-slate-500 mt-0.5">Operasi berhasil diselesaikan.</p>
+                    </div>
+                </div>
+
+                <!-- ================== MENU DASHBOARD ================== -->
+                <section id="menu-dashboard" class="space-y-6">
+                    <!-- Widget Ringkasan -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Total Karyawan</p>
+                                <h3 class="text-2xl font-bold text-slate-900 mt-1" id="dashTotalKaryawan">0</h3>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-circle-dollar-to-slot"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Total Gaji Pokok</p>
+                                <h3 class="text-2xl font-bold text-slate-900 mt-1" id="dashTotalGaji">Rp 0</h3>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-hand-holding-dollar"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Total Ambilan</p>
+                                <h3 class="text-2xl font-bold text-slate-900 mt-1" id="dashTotalAmbilan">Rp 0</h3>
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Sisa Pembayaran</p>
+                                <h3 class="text-2xl font-bold text-slate-900 mt-1" id="dashSisaGaji">Rp 0</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart Grid -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Chart Komparasi Global Karyawan -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-base">Komparasi Gaji & Ambilan Global</h3>
+                                    <p class="text-xs text-slate-400">Ikhtisar perbandingan semua karyawan</p>
+                                </div>
+                                <span class="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full font-bold">Semua Karyawan</span>
+                            </div>
+                            <div class="relative h-80">
+                                <canvas id="chartGajiKaryawan"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Daftar Ambilan Terbaru -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col">
+                            <div class="mb-4">
+                                <h3 class="font-bold text-slate-900 text-base">Ambilan Terbaru</h3>
+                                <p class="text-xs text-slate-400">5 transaksi kasbon terakhir</p>
+                            </div>
+                            <div class="flex-1 overflow-y-auto space-y-3 max-h-80 pr-1" id="dashRecentAmbilan">
+                                <!-- List Dinamis -->
+                                <p class="text-xs text-slate-400 text-center py-8">Belum ada data transaksi.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row Baru: Chart Individu Karyawan & Chart Tren Omset Harian -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Chart Detail Masing-masing Karyawan -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                            <div class="mb-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="font-bold text-slate-900 text-base">Profil Detail Karyawan</h3>
+                                    <span class="text-xs text-slate-400">Analisis Personalisasi</span>
+                                </div>
+                                <select id="dashSelectKaryawan" onchange="renderIndividualEmployeeChart()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-700">
+                                    <!-- Dinamis -->
+                                </select>
+                            </div>
+                            <div class="relative h-64 flex items-center justify-center">
+                                <canvas id="chartIndividualKaryawan"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Chart Tren Omset Harian -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm lg:col-span-2">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                                <div>
+                                    <h3 class="font-bold text-slate-900 text-base">Tren Arus Kas & Omset Harian</h3>
+                                    <p class="text-xs text-slate-400">Aliran dana masuk, keluar, dan simpan harian</p>
+                                </div>
+                                <input type="month" id="dashOmsetBulan" onchange="renderOmsetHarianChart()" class="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div class="relative h-64">
+                                <canvas id="chartOmsetHarian"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================== MENU KARYAWAN ================== -->
+                <section id="menu-karyawan" class="hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="relative w-full sm:w-72">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </span>
+                            <input type="text" id="searchKaryawan" oninput="renderKaryawanTable()" class="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Cari nama karyawan...">
+                        </div>
+                        <button onclick="openKaryawanModal()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl text-sm flex items-center justify-center gap-2 shadow-md shadow-blue-100">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Tambah Karyawan</span>
+                        </button>
+                    </div>
+
+                    <!-- Tabel Karyawan -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                                        <th class="py-4 px-6">ID</th>
+                                        <th class="py-4 px-6">Karyawan</th>
+                                        <th class="py-4 px-6">Jabatan</th>
+                                        <th class="py-4 px-6">Tanggal Mulai Kerja</th>
+                                        <th class="py-4 px-6">Gaji Bulanan</th>
+                                        <th class="py-4 px-6 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="karyawanTableBody" class="divide-y divide-slate-100 text-sm text-slate-600">
+                                    <!-- Dinamis -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================== MENU AMBILAN ================== -->
+                <section id="menu-ambilan" class="hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex flex-col sm:flex-row items-stretch gap-3 w-full sm:w-auto">
+                            <select id="filterAmbilanKaryawan" onchange="renderAmbilanTable()" class="bg-white border border-slate-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                <option value="">Semua Karyawan</option>
+                            </select>
+                        </div>
+                        <button onclick="openAmbilanModal()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl text-sm flex items-center justify-center gap-2 shadow-md shadow-blue-100">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Input Ambilan</span>
+                        </button>
+                    </div>
+
+                    <!-- Tabel Ambilan -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                                        <th class="py-4 px-6">Tanggal</th>
+                                        <th class="py-4 px-6">Karyawan</th>
+                                        <th class="py-4 px-6">Keterangan</th>
+                                        <th class="py-4 px-6">Total Ambilan</th>
+                                        <th class="py-4 px-6 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ambilanTableBody" class="divide-y divide-slate-100 text-sm text-slate-600">
+                                    <!-- Dinamis -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================== MENU LAPORAN ================== -->
+                <section id="menu-laporan" class="hidden space-y-6">
+                    <!-- Filter Laporan -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row items-end gap-4">
+                        <div class="w-full md:w-1/3">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Pilih Karyawan</label>
+                            <select id="laporanFilterKaryawan" onchange="handleLaporanFilterChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                <!-- Dinamis -->
+                            </select>
+                        </div>
+                        <div class="w-full md:w-1/4">
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Per Tanggal Hari Ini</label>
+                            <input type="date" id="laporanSampaiTanggal" onchange="handleLaporanFilterChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <div class="w-full md:w-auto ml-auto flex gap-2">
+                            <button onclick="printSlipGaji()" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl text-sm flex items-center justify-center gap-2 shadow-md shadow-blue-100">
+                                <i class="fa-solid fa-print"></i>
+                                <span>Cetak Slip / Details</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Slip Gaji / Card Laporan -->
+                    <div id="printArea" class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm max-w-3xl mx-auto space-y-6">
+                        <!-- Kop -->
+                        <div class="flex justify-between items-start border-b border-dashed border-slate-200 pb-6">
+                            <div>
+                                <h2 class="text-2xl font-black text-slate-900 tracking-tight">SLIP PERHITUNGAN GAJI</h2>
+                                <p class="text-xs text-slate-400 mt-1" id="printSlipID">ID Karyawan: -</p>
+                            </div>
+                            <div class="text-right">
+                                <h3 class="font-extrabold text-blue-600 text-lg">PAYROLL</h3>
+                                <p class="text-xs text-slate-400 mt-1" id="printGenerateDate">Dicetak: -</p>
+                            </div>
+                        </div>
+
+                        <!-- Biodata Karyawan -->
+                        <div class="flex flex-col md:flex-row gap-6 bg-slate-50 p-5 rounded-xl text-xs items-center">
+                            <!-- Foto Karyawan di Slip -->
+                            <div class="w-24 h-24 rounded-xl border border-slate-200 overflow-hidden bg-white shrink-0 shadow-sm">
+                                <img id="printFotoKaryawan" src="" class="w-full h-full object-cover" alt="Foto Karyawan">
+                            </div>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+                                <div>
+                                    <p class="text-slate-400 font-semibold uppercase tracking-wider">Nama Karyawan</p>
+                                    <p class="text-sm font-bold text-slate-800 mt-1" id="printNamaKaryawan">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-slate-400 font-semibold uppercase tracking-wider">Jabatan / Posisi</p>
+                                    <p class="text-sm font-bold text-slate-800 mt-1" id="printJabatanKaryawan">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-slate-400 font-semibold uppercase tracking-wider">Tanggal Gabung</p>
+                                    <p class="text-sm font-bold text-slate-800 mt-1" id="printTglMulaiKaryawan">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-slate-400 font-semibold uppercase tracking-wider">Masa Kerja Aktif</p>
+                                    <p class="text-sm font-bold text-slate-800 mt-1 text-blue-600" id="printMasaKerja">- Hari</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Rincian Keuangan Utama -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="border border-slate-100 rounded-xl p-4 bg-emerald-50/40">
+                                <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Total Akumulasi Gaji</p>
+                                <p class="text-xl font-extrabold text-slate-900 mt-1" id="printTotalGajiAkumulasi">Rp 0</p>
+                                <span class="text-[10px] text-slate-400" id="printHitunganGajiInfo">Masa kerja x (Gaji bulanan / 30 hari)</span>
+                            </div>
+                            <div class="border border-slate-100 rounded-xl p-4 bg-rose-50/40">
+                                <p class="text-xs font-bold text-rose-600 uppercase tracking-wider">Total Potongan Ambilan</p>
+                                <p class="text-xl font-extrabold text-slate-900 mt-1" id="printTotalPotonganAmbilan">Rp 0</p>
+                                <span class="text-[10px] text-slate-400">Total kasbon ditarik</span>
+                            </div>
+                            <div class="border border-slate-100 rounded-xl p-4 bg-blue-50/40">
+                                <p class="text-xs font-bold text-blue-600 uppercase tracking-wider">Sisa Gaji Dibayar (Bersih)</p>
+                                <p class="text-xl font-extrabold text-blue-700 mt-1" id="printSisaGajiBersih">Rp 0</p>
+                                <span class="text-[10px] text-slate-400">Gaji akumulasi - Ambilan</span>
+                            </div>
+                        </div>
+
+                        <!-- Detail Riwayat Ambilan -->
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-900 mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-list-ul text-blue-600"></i>
+                                <span>Rincian History Ambilan</span>
+                            </h4>
+                            <div class="border border-slate-100 rounded-xl overflow-hidden">
+                                <table class="w-full text-left text-xs">
+                                    <thead>
+                                        <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
+                                            <th class="py-3 px-4">Tanggal</th>
+                                            <th class="py-3 px-4">Keterangan</th>
+                                            <th class="py-3 px-4 text-right">Jumlah</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="printHistoryAmbilanBody" class="divide-y divide-slate-100 text-slate-600">
+                                        <!-- Dinamis -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tanda Tangan (Untuk Print) -->
+                        <div class="grid grid-cols-2 gap-4 pt-12 text-center text-xs text-slate-500">
+                            <div>
+                                <p>Penerima,</p>
+                                <div class="h-16"></div>
+                                <p class="font-bold text-slate-800" id="printTtdNamaKaryawan">-</p>
+                            </div>
+                            <div>
+                                <p>Mengetahui,</p>
+                                <div class="h-16"></div>
+                                <p class="font-bold text-slate-800">Manajer Operasional</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ================== MENU OMSET HARIAN ================== -->
+                <section id="menu-omset" class="hidden space-y-6">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex flex-col sm:flex-row items-stretch gap-3 w-full sm:w-auto">
+                            <!-- Filter Omset -->
+                            <input type="month" id="filterOmsetBulan" onchange="renderOmsetTable()" class="bg-white border border-slate-200 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        </div>
+                        <button onclick="openOmsetModal()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl text-sm flex items-center justify-center gap-2 shadow-md shadow-blue-100">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Catat Omset Harian</span>
+                        </button>
+                    </div>
+
+                    <!-- Tabel Omset Harian -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider">
+                                        <th class="py-4 px-6">Tanggal</th>
+                                        <th class="py-4 px-6">Baki Semalam (4)</th>
+                                        <th class="py-4 px-6">Keluar Hari Ini (3)</th>
+                                        <th class="py-4 px-6">Cash Money Hari Ini (5)</th>
+                                        <th class="py-4 px-6">Masuk (Formula) (2)</th>
+                                        <th class="py-4 px-6">Simpan (6)</th>
+                                        <th class="py-4 px-6 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="omsetTableBody" class="divide-y divide-slate-100 text-sm text-slate-600">
+                                    <!-- Dinamis -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs text-blue-700 space-y-1">
+                        <p class="font-bold flex items-center gap-1"><i class="fa-solid fa-circle-info"></i> Aturan Logika Omset Harian:</p>
+                        <p>1. <strong>Baki Semalam (Kolom 4)</strong>: Diambil secara otomatis dari sisa (Cash Money - Simpan) hari sebelumnya, namun nilai ini **tetap dapat Anda edit dan ubah secara bebas** pada form input.</p>
+                        <p>2. <strong>Masuk (Kolom 2)</strong>: Dihitung otomatis dengan formula: <code>(Cash Money Hari Ini + Keluar) - Baki Semalam</code>.</p>
+                        <p>3. <strong>Simpan (Kolom 6)</strong>: Nominal uang cash yang disimpan/disetor.</p>
+                    </div>
+                </section>
+
+                <!-- ================== MENU SETTING ================== -->
+                <section id="menu-setting" class="hidden space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        
+                        <!-- Panel User Accounts (Karyawan) -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h3 class="font-bold text-slate-900 text-base">Manajemen User / Akses Login</h3>
+                                <button onclick="openUserModal()" class="bg-slate-100 hover:bg-blue-50 text-blue-600 hover:text-blue-700 font-semibold py-1.5 px-3 rounded-lg text-xs flex items-center gap-1.5 transition-all">
+                                    <i class="fa-solid fa-user-plus"></i>
+                                    <span>Tambah User</span>
+                                </button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs">
+                                    <thead>
+                                        <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 font-bold uppercase tracking-wider">
+                                            <th class="py-3 px-4">Username</th>
+                                            <th class="py-3 px-4">Akses (Karyawan)</th>
+                                            <th class="py-3 px-4">Password</th>
+                                            <th class="py-3 px-4 text-center">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="userTableBody" class="divide-y divide-slate-100 text-slate-600">
+                                        <!-- Dinamis -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Konfigurasi Google Sheets API & Backup -->
+                        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                            <h3 class="font-bold text-slate-900 text-base">Integrasi Google Sheet Backend</h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-500 mb-1">Web App URL (Google Apps Script)</label>
+                                    <input type="text" id="settingScriptUrl" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="https://script.google.com/macros/s/.../exec">
+                                </div>
+                                <button onclick="saveSettings()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition-all w-full flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    <span>Simpan Konfigurasi</span>
+                                </button>
+                            </div>
+
+                            <div class="mt-4 pt-4 border-t border-slate-100">
+                                <h4 class="font-semibold text-xs text-slate-800 mb-2">Panduan Sinkronisasi:</h4>
+                                <ol class="list-decimal pl-4 text-[11px] text-slate-400 space-y-1">
+                                    <li>Salin file Google Sheets dan deploy kode Apps Script di dalamnya.</li>
+                                    <li>Masukkan URL Web App hasil deploy Apps Script di atas.</li>
+                                    <li>Data akan disinkronkan secara otomatis dan aman (tersimpan permanen di cloud).</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ================== MODAL KARYAWAN ================== -->
+    <div id="karyawanModal" class="hidden fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md border border-slate-100 overflow-hidden transform scale-95 transition-all">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-bold text-slate-900" id="karyawanModalTitle">Tambah Karyawan</h3>
+                <button onclick="closeKaryawanModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="karyawanForm" onsubmit="handleKaryawanSubmit(event)" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+                <input type="hidden" id="karyawanEditId">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">ID Karyawan</label>
+                    <input type="text" id="karyawanFormId" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: K-001">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Lengkap</label>
+                    <input type="text" id="karyawanFormNama" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Nama Karyawan">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Jabatan / Posisi</label>
+                    <input type="text" id="karyawanFormJabatan" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: Staff Admin, Kasir, Kurir">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Tanggal Mulai Kerja</label>
+                    <input type="date" id="karyawanFormTglKerja" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Gaji Pokok Bulanan</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-slate-400">Rp</span>
+                        <input type="number" id="karyawanFormGaji" required class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: 3000000">
+                    </div>
+                </div>
+                <!-- Upload Foto Karyawan -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-2">Upload Foto Karyawan</label>
+                    <div class="flex items-center gap-4">
+                        <div id="karyawanFotoPreviewContainer" class="w-16 h-16 rounded-full border border-slate-200 overflow-hidden bg-slate-100 flex items-center justify-center shrink-0">
+                            <img id="karyawanFotoPreview" src="" class="w-full h-full object-cover hidden" alt="Pratinjau Foto">
+                            <i id="karyawanFotoPlaceholder" class="fa-solid fa-user text-slate-400 text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <input type="file" id="karyawanFormFoto" accept="image/*" onchange="handleFotoUpload(event)" class="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                            <p class="text-[10px] text-slate-400 mt-1">Format JPG, PNG, atau WEBP. Maks 1MB. (Akan dikompresi otomatis)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="closeKaryawanModal()" class="px-4 py-2 text-slate-500 hover:bg-slate-50 rounded-xl text-sm font-semibold">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================== MODAL AMBILAN ================== -->
+    <div id="ambilanModal" class="hidden fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md border border-slate-100 overflow-hidden transform scale-95 transition-all">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-bold text-slate-900" id="ambilanModalTitle">Input Ambilan Baru</h3>
+                <button onclick="closeAmbilanModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="ambilanForm" onsubmit="handleAmbilanSubmit(event)" class="p-6 space-y-4">
+                <input type="hidden" id="ambilanEditId">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Karyawan</label>
+                    <select id="ambilanFormKaryawan" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        <!-- Dinamis -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Tanggal</label>
+                    <input type="date" id="ambilanFormTanggal" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Keterangan Ambilan</label>
+                    <input type="text" id="ambilanFormKeterangan" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: Kasbon Mingguan, Pembelian Pribadi">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Nominal Ambilan</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-slate-400">Rp</span>
+                        <input type="number" id="ambilanFormTotal" required class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: 50000">
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="closeAmbilanModal()" class="px-4 py-2 text-slate-500 hover:bg-slate-50 rounded-xl text-sm font-semibold">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold">Simpan Ambilan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================== MODAL USER ACCOUNTS ================== -->
+    <div id="userModal" class="hidden fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md border border-slate-100 overflow-hidden transform scale-95 transition-all">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-bold text-slate-900">Tambah Akun Karyawan</h3>
+                <button onclick="closeUserModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="userForm" onsubmit="handleUserSubmit(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Tautkan ke Karyawan</label>
+                    <select id="userFormKaryawan" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        <!-- Dinamis -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Username Login</label>
+                    <input type="text" id="userFormUsername" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Contoh: agus123">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Password Login</label>
+                    <input type="password" id="userFormPassword" required class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="Buat password">
+                </div>
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="closeUserModal()" class="px-4 py-2 text-slate-500 hover:bg-slate-50 rounded-xl text-sm font-semibold">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold">Simpan Akun</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================== MODAL OMSET HARIAN ================== -->
+    <div id="omsetModal" class="hidden fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md border border-slate-100 overflow-hidden transform scale-95 transition-all">
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <h3 class="font-bold text-slate-900" id="omsetModalTitle">Input Omset Harian</h3>
+                <button onclick="closeOmsetModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="omsetForm" onsubmit="handleOmsetSubmit(event)" class="p-6 space-y-4">
+                <input type="hidden" id="omsetEditId">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Tanggal</label>
+                    <input type="date" id="omsetFormTanggal" required onchange="calculateBakiSemalam()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Baki Semalam (Kolom 4)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-slate-400">Rp</span>
+                        <input type="number" id="omsetFormBakiSemalam" oninput="calculateMasukField()" class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="0">
+                    </div>
+                    <span class="text-[10px] text-slate-400">Dapat diedit atau diisi otomatis dari sisa cash kemarin</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Keluar Hari Ini (Kolom 3)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-slate-400">Rp</span>
+                        <input type="number" id="omsetFormKeluar" required oninput="calculateMasukField()" class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="0">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Cash Money Hari Ini (Kolom 5)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-slate-400">Rp</span>
+                        <input type="number" id="omsetFormCashMoney" required oninput="calculateMasukField()" class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="0">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Uang Masuk (Kolom 2) - Formula</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-slate-400">Rp</span>
+                        <input type="number" id="omsetFormMasuk" readonly class="w-full pl-9 pr-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-600 text-sm font-bold cursor-not-allowed" placeholder="0">
+                    </div>
+                    <span class="text-[10px] text-slate-400">(Cash Money + Keluar) - Baki Semalam</span>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">Simpan (Kolom 6)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-sm text-slate-400">Rp</span>
+                        <input type="number" id="omsetFormSimpan" required class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" placeholder="0">
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-slate-100 flex justify-end gap-2">
+                    <button type="button" onclick="closeOmsetModal()" class="px-4 py-2 text-slate-500 hover:bg-slate-50 rounded-xl text-sm font-semibold">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold">Simpan Harian</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- CLIENT SIDE LOGIC -->
+    <script>
+        // Default Avatar SVG string
+        const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'/></svg>";
+
+        // === STATE DATABASE (DEFAULT IN-MEMORY DENGAN FALLBACK LOCALSTORAGE SEBELUM DI-SINKRON KE GOOGLE SHEET) ===
+        let store = {
+            karyawan: [
+                { id: "K-001", nama: "Andi Saputra", jabatan: "Kepala Cabang", tglKerja: "2026-01-10", gaji: 4500000, foto: "" },
+                { id: "K-002", nama: "Siti Rahma", jabatan: "Kasir", tglKerja: "2026-02-15", gaji: 3200000, foto: "" },
+                { id: "K-003", nama: "Budi Santoso", jabatan: "Gudang & Logistik", tglKerja: "2026-03-01", gaji: 3000000, foto: "" }
+            ],
+            ambilan: [
+                { id: "A-1", karyawanId: "K-002", tanggal: "2026-06-01", keterangan: "Ambilan Kasbon Mingguan", total: 150000 },
+                { id: "A-2", karyawanId: "K-003", tanggal: "2026-06-03", keterangan: "Keperluan Pribadi", total: 100000 }
+            ],
+            users: [
+                { username: "admin", password: "z@ki2013", role: "admin", karyawanId: "" },
+                { username: "siti", password: "123", role: "karyawan", karyawanId: "K-002" },
+                { username: "budi", password: "123", role: "karyawan", karyawanId: "K-003" }
+            ],
+            omset: [
+                { id: "O-1", tanggal: "2026-06-05", bakiSemalam: 200000, keluar: 120000, cashMoney: 550000, masuk: 470000, simpan: 400000 },
+                { id: "O-2", tanggal: "2026-06-06", bakiSemalam: 150000, keluar: 80000, cashMoney: 450000, masuk: 380000, simpan: 350000 },
+                { id: "O-3", tanggal: "2026-06-07", bakiSemalam: 100000, keluar: 150000, cashMoney: 750000, masuk: 800000, simpan: 600000 },
+                { id: "O-4", tanggal: "2026-06-08", bakiSemalam: 150000, keluar: 110000, cashMoney: 620000, masuk: 580000, simpan: 500000 },
+                { id: "O-5", tanggal: "2026-06-09", bakiSemalam: 120000, keluar: 150000, cashMoney: 600000, masuk: 630000, simpan: 500000 },
+                { id: "O-6", tanggal: "2026-06-10", bakiSemalam: 100000, keluar: 80000, cashMoney: 450000, masuk: 430000, simpan: 350000 }
+            ],
+            settings: {
+                scriptUrl: ""
+            }
+        };
+
+        // Current User Login Session state
+        let currentUser = null;
+        let activeMenu = "dashboard";
+        let mainChartInstance = null;
+        let individualChartInstance = null;
+        let omsetChartInstance = null;
+        let uploadedFotoBase64 = ""; // Menampung sementara base64 foto yang sedang diupload
+
+        // === INITIATION ===
+        window.onload = function() {
+            if(localStorage.getItem('payroll_local_db')) {
+                store = JSON.parse(localStorage.getItem('payroll_local_db'));
+            }
+            
+            document.getElementById('laporanSampaiTanggal').value = new Date().toISOString().substring(0, 10);
+            document.getElementById('dashOmsetBulan').value = new Date().toISOString().substring(0, 7);
+            
+            updateSyncBadgeState(false);
+            
+            if (store.settings.scriptUrl) {
+                syncDataFromSheet();
+            }
+        };
+
+        // Save ke LocalStorage agar tidak hilang saat reload halaman
+        function saveToLocalStorage() {
+            localStorage.setItem('payroll_local_db', JSON.stringify(store));
+        }
+
+        // === NOTIFIKASI TOAST ===
+        function showToast(title, message, type = 'success') {
+            const toast = document.getElementById('globalToast');
+            const iconBg = document.getElementById('toastIconBg');
+            const icon = document.getElementById('toastIcon');
+            const tTitle = document.getElementById('toastTitle');
+            const tMsg = document.getElementById('toastMessage');
+
+            tTitle.textContent = title;
+            tMsg.textContent = message;
+
+            if (type === 'success') {
+                iconBg.className = "w-8 h-8 rounded-lg flex items-center justify-center text-white bg-emerald-500 shadow-md shadow-emerald-100";
+                icon.className = "fa-solid fa-circle-check";
+            } else if (type === 'error') {
+                iconBg.className = "w-8 h-8 rounded-lg flex items-center justify-center text-white bg-rose-500 shadow-md shadow-rose-100";
+                icon.className = "fa-solid fa-triangle-exclamation";
+            } else {
+                iconBg.className = "w-8 h-8 rounded-lg flex items-center justify-center text-white bg-blue-500 shadow-md shadow-blue-100";
+                icon.className = "fa-solid fa-info";
+            }
+
+            toast.classList.remove('hidden');
+            toast.style.transform = "translateY(-10px)";
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 4000);
+        }
+
+        // === REAL-TIME SYNC ENGINE (GOOGLE APPS SCRIPT CLOUD INTEGRATION) ===
+        function updateSyncBadgeState(isSyncing, hasError = false) {
+            const syncStatus = document.getElementById('syncStatus');
+            const syncText = document.getElementById('syncText');
+            const icon = document.getElementById('syncBtnIcon');
+
+            if (isSyncing) {
+                syncStatus.className = "flex items-center gap-1.5 px-3 py-1.5 bg-yellow-50 border border-yellow-200 rounded-full text-xs text-yellow-600 font-semibold";
+                syncText.textContent = "Mensinkronisasi...";
+                icon.classList.add('animate-spin');
+            } else if (hasError) {
+                syncStatus.className = "flex items-center gap-1.5 px-3 py-1.5 bg-red-50 border border-red-200 rounded-full text-xs text-red-600 font-semibold";
+                syncText.textContent = "Offline (Local)";
+                icon.classList.remove('animate-spin');
+            } else {
+                syncStatus.className = "flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full text-xs text-green-600 font-semibold";
+                syncText.textContent = store.settings.scriptUrl ? "Tersambung Cloud Sheet" : "Penyimpanan Lokal";
+                icon.classList.remove('animate-spin');
+            }
+        }
+
+        // Fungsi Ambil Data dari Google Sheets (GET)
+        async function syncDataFromSheet() {
+            if (!store.settings.scriptUrl) {
+                showToast("Sistem Penyimpanan Lokal", "Aplikasi berjalan tanpa Cloud. Atur Google Sheet di menu Setting jika ingin sinkronisasi multi-device.", "info");
+                updateSyncBadgeState(false, false);
+                return;
+            }
+
+            updateSyncBadgeState(true);
+            try {
+                const resData = await fetchWithRetry(`${store.settings.scriptUrl}?action=get_data`);
+                if (resData && resData.status === 'success') {
+                    store.karyawan = resData.data.karyawan || store.karyawan;
+                    store.ambilan = resData.data.ambilan || store.ambilan;
+                    store.users = resData.data.users || store.users;
+                    store.omset = resData.data.omset || store.omset;
+                    
+                    saveToLocalStorage();
+                    showToast("Sinkronisasi Sukses", "Semua data berhasil ditarik dari Google Sheet.", "success");
+                    updateSyncBadgeState(false, false);
+                    
+                    renderActiveMenu();
+                } else {
+                    throw new Error("Gagal parsing data dari sheet");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("Sinkronisasi Gagal", "Gagal memuat data cloud. Sistem otomatis beralih ke penyimpanan lokal.", "error");
+                updateSyncBadgeState(false, true);
+            }
+        }
+
+        // Fungsi Dorong & Simpan Data ke Google Sheets (POST)
+        async function pushDataToSheet() {
+            saveToLocalStorage();
+            if (!store.settings.scriptUrl) {
+                return;
+            }
+
+            updateSyncBadgeState(true);
+            try {
+                const response = await fetchWithRetry(store.settings.scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: "save_data",
+                        data: {
+                            karyawan: store.karyawan,
+                            ambilan: store.ambilan,
+                            users: store.users,
+                            omset: store.omset
+                        }
+                    })
+                });
+                
+                showToast("Tersimpan Permanen", "Perubahan baru berhasil diekspor ke Google Sheets.", "success");
+                updateSyncBadgeState(false, false);
+            } catch (err) {
+                console.error(err);
+                showToast("Koneksi Error", "Perubahan tersimpan secara lokal. Akan tersinkron kembali saat koneksi pulih.", "error");
+                updateSyncBadgeState(false, true);
+            }
+        }
+
+        // Helper Exponential Backoff fetch
+        async function fetchWithRetry(url, options = {}, retries = 5, delay = 1000) {
+            try {
+                const response = await fetch(url, options);
+                if (options.method === 'POST') return { status: 'success' };
+                return await response.json();
+            } catch (error) {
+                if (retries > 1) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return fetchWithRetry(url, options, retries - 1, delay * 2);
+                } else {
+                    throw error;
+                }
+            }
+        }
+
+
+        // === LOGIN & LOGOUT SYSTEM ===
+        function handleLogin(e) {
+            e.preventDefault();
+            const userInp = document.getElementById('username').value.trim();
+            const passInp = document.getElementById('password').value.trim();
+            const roleInp = document.querySelector('input[name="loginRole"]:checked').value;
+
+            const userFound = store.users.find(u => u.username.toLowerCase() === userInp.toLowerCase() && u.password === passInp && u.role === roleInp);
+
+            if (userFound) {
+                currentUser = userFound;
+                document.getElementById('loginPage').classList.add('hidden');
+                document.getElementById('appPage').classList.remove('hidden');
+                
+                document.getElementById('loggedInUserName').textContent = userFound.role === 'admin' ? "Administrator" : getKaryawanName(userFound.karyawanId);
+                document.getElementById('loggedInUserDetail').textContent = userFound.role === 'admin' ? "Akses Penuh Aplikasi" : `Karyawan ID: ${userFound.karyawanId}`;
+                document.getElementById('avatarName').textContent = userFound.role === 'admin' ? "AD" : getKaryawanName(userFound.karyawanId).substring(0,2).toUpperCase();
+                document.getElementById('userRoleBadge').textContent = userFound.role.toUpperCase() + " PANEL";
+
+                buildSidebarMenu(userFound.role);
+
+                switchMenu(userFound.role === 'admin' ? 'dashboard' : 'laporan');
+                
+                showToast("Selamat Datang", `Berhasil masuk sebagai ${userFound.role === 'admin' ? 'Admin' : 'Karyawan'}.`, "success");
+            } else {
+                const errAlert = document.getElementById('loginAlert');
+                const errMsg = document.getElementById('loginAlertMsg');
+                errMsg.textContent = "Data kredensial atau tipe akses yang Anda pilih tidak cocok.";
+                errAlert.classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('appPage').classList.add('hidden');
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('loginForm').reset();
+            document.getElementById('loginAlert').classList.add('hidden');
+            showToast("Keluar", "Sesi Anda telah diakhiri secara aman.", "info");
+        }
+
+        function getKaryawanName(id) {
+            const match = store.karyawan.find(k => k.id === id);
+            return match ? match.nama : "Karyawan Tidak Diketahui";
+        }
+
+        // Mendapatkan Foto Karyawan dengan Fallback defaultAvatar
+        function getKaryawanFoto(id) {
+            const match = store.karyawan.find(k => k.id === id);
+            return match && match.foto ? match.foto : defaultAvatar;
+        }
+
+
+        // === PEMBUATAN SIDEBAR DINAMIS ===
+        function buildSidebarMenu(role) {
+            const nav = document.getElementById('sidebarMenu');
+            nav.innerHTML = "";
+
+            let menus = [];
+
+            if (role === 'admin') {
+                menus = [
+                    { id: "dashboard", icon: "fa-chart-line", label: "Dashboard", desc: "Ikhtisar Performa Bisnis" },
+                    { id: "karyawan", icon: "fa-users", label: "Kelola Karyawan", desc: "Data & Gaji Pokok" },
+                    { id: "ambilan", icon: "fa-hand-holding-dollar", label: "Ambilan / Kasbon", desc: "Catat Ambilan Transaksi" },
+                    { id: "laporan", icon: "fa-file-invoice-dollar", label: "Laporan Gaji", desc: "Kalkulasi Slip Gaji Karyawan" },
+                    { id: "omset", icon: "fa-calculator", label: "Omset Harian", desc: "Arus Kas Masuk & Keluar" },
+                    { id: "setting", icon: "fa-sliders", label: "Setting", desc: "Konfigurasi & Pengguna" }
+                ];
+            } else {
+                menus = [
+                    { id: "laporan", icon: "fa-file-invoice-dollar", label: "Laporan Gaji Saya", desc: "Rincian Gaji & Kasbon Anda" }
+                ];
+            }
+
+            menus.forEach(m => {
+                const btn = document.createElement('button');
+                btn.onclick = () => switchMenu(m.id);
+                btn.id = `btn-menu-${m.id}`;
+                btn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-sm transition-all focus:outline-none hover:bg-slate-800 hover:text-white";
+                btn.innerHTML = `
+                    <div class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-white">
+                        <i class="fa-solid ${m.icon}"></i>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-xs text-inherit">${m.label}</p>
+                    </div>
+                `;
+                nav.appendChild(btn);
+            });
+        }
+
+        function switchMenu(menuId) {
+            activeMenu = menuId;
+            
+            const sections = ['dashboard', 'karyawan', 'ambilan', 'laporan', 'omset', 'setting'];
+            sections.forEach(s => {
+                const el = document.getElementById(`menu-${s}`);
+                if (el) el.classList.add('hidden');
+                
+                const btn = document.getElementById(`btn-menu-${s}`);
+                if (btn) {
+                    btn.classList.remove('bg-blue-600', 'text-white');
+                    btn.classList.add('text-slate-400');
+                }
+            });
+
+            document.getElementById(`menu-${menuId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-menu-${menuId}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-400');
+                activeBtn.classList.add('bg-blue-600', 'text-white');
+            }
+
+            const headerTitles = {
+                dashboard: { title: "Dashboard Analitik", desc: "Ringkasan visual dan statistik cepat data operasional Anda." },
+                karyawan: { title: "Kelola Data Karyawan", desc: "Tambah, edit, atau nonaktifkan informasi keanggotaan karyawan." },
+                ambilan: { title: "Transaksi Ambilan / Kasbon", desc: "Catat penarikan kasbon harian karyawan secara rapi." },
+                laporan: { title: "Laporan Rekapitulasi Gaji", desc: "Pemberian gaji dikalkulasi otomatis dipotong ambilan." },
+                omset: { title: "Pembukuan Omset Harian", desc: "Kelola kas semalam, kas harian, dan setoran simpanan toko harian." },
+                setting: { title: "Pengaturan Sistem", desc: "Hubungkan database Google Sheets dan buat user akses karyawan." }
+            };
+
+            document.getElementById('currentMenuTitle').textContent = headerTitles[menuId].title;
+            document.getElementById('currentMenuDesc').textContent = headerTitles[menuId].desc;
+
+            renderActiveMenu();
+        }
+
+        function renderActiveMenu() {
+            if (activeMenu === 'dashboard') {
+                renderDashboard();
+            } else if (activeMenu === 'karyawan') {
+                renderKaryawanTable();
+            } else if (activeMenu === 'ambilan') {
+                populateAmbilanDropdownKaryawan();
+                renderAmbilanTable();
+            } else if (activeMenu === 'laporan') {
+                renderLaporanSection();
+            } else if (activeMenu === 'omset') {
+                renderOmsetTable();
+            } else if (activeMenu === 'setting') {
+                renderSettings();
+            }
+        }
+
+
+        // === RENDER MENU: DASHBOARD ===
+        function renderDashboard() {
+            const totalKaryawan = store.karyawan.length;
+            document.getElementById('dashTotalKaryawan').textContent = totalKaryawan;
+
+            let totalAkumulasiGajiAll = 0;
+            let totalAmbilanAll = 0;
+
+            const hariIni = new Date();
+
+            store.karyawan.forEach(k => {
+                const tglMulai = new Date(k.tglKerja);
+                const diffTime = Math.abs(hariIni - tglMulai);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const gajiHarian = k.gaji / 30;
+                totalAkumulasiGajiAll += (diffDays * gajiHarian);
+            });
+
+            store.ambilan.forEach(a => {
+                totalAmbilanAll += Number(a.total);
+            });
+
+            const sisaGajiAll = totalAkumulasiGajiAll - totalAmbilanAll;
+
+            document.getElementById('dashTotalGaji').textContent = "Rp " + Math.round(totalAkumulasiGajiAll).toLocaleString('id-ID');
+            document.getElementById('dashTotalAmbilan').textContent = "Rp " + Math.round(totalAmbilanAll).toLocaleString('id-ID');
+            document.getElementById('dashSisaGaji').textContent = "Rp " + Math.round(sisaGajiAll).toLocaleString('id-ID');
+
+            const recentContainer = document.getElementById('dashRecentAmbilan');
+            recentContainer.innerHTML = "";
+            
+            const sortedAmbilan = [...store.ambilan].sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal)).slice(0, 5);
+
+            if(sortedAmbilan.length === 0) {
+                recentContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-8">Belum ada transaksi.</p>`;
+            } else {
+                sortedAmbilan.forEach(a => {
+                    const el = document.createElement('div');
+                    el.className = "flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100 hover:border-blue-100 transition-all gap-3";
+                    
+                    const srcFoto = getKaryawanFoto(a.karyawanId);
+
+                    el.innerHTML = `
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <div class="w-8 h-8 rounded-full border border-slate-200 overflow-hidden bg-white shrink-0 shadow-sm flex items-center justify-center">
+                                <img src="${srcFoto}" class="w-full h-full object-cover" alt="${getKaryawanName(a.karyawanId)}">
+                            </div>
+                            <div class="truncate">
+                                <p class="text-xs font-bold text-slate-800 truncate">${getKaryawanName(a.karyawanId)}</p>
+                                <p class="text-[10px] text-slate-400 truncate">${a.tanggal} • ${a.keterangan}</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-rose-600 shrink-0">-Rp ${Number(a.total).toLocaleString('id-ID')}</span>
+                    `;
+                    recentContainer.appendChild(el);
+                });
+            }
+
+            const dashSelector = document.getElementById('dashSelectKaryawan');
+            dashSelector.innerHTML = "";
+            store.karyawan.forEach(k => {
+                dashSelector.innerHTML += `<option value="${k.id}">${k.nama}</option>`;
+            });
+
+            renderDashboardCharts();
+        }
+
+        function renderDashboardCharts() {
+            renderMainKomparasiChart();
+            renderIndividualEmployeeChart();
+            renderOmsetHarianChart();
+        }
+
+        function renderMainKomparasiChart() {
+            const ctx = document.getElementById('chartGajiKaryawan').getContext('2d');
+            
+            if (mainChartInstance) {
+                mainChartInstance.destroy();
+            }
+
+            const names = [];
+            const akumulasiGajiData = [];
+            const ambilanData = [];
+
+            const hariIni = new Date();
+
+            store.karyawan.forEach(k => {
+                names.push(k.nama);
+                
+                const tglMulai = new Date(k.tglKerja);
+                const diffTime = Math.abs(hariIni - tglMulai);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const gajiHarian = k.gaji / 30;
+                const akumulasi = Math.round(diffDays * gajiHarian);
+                akumulasiGajiData.push(akumulasi);
+
+                const totalAmb = store.ambilan
+                    .filter(a => a.karyawanId === k.id)
+                    .reduce((sum, item) => sum + Number(item.total), 0);
+                ambilanData.push(totalAmb);
+            });
+
+            mainChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: names,
+                    datasets: [
+                        {
+                            label: 'Akumulasi Gaji Pokok (Rp)',
+                            data: akumulasiGajiData,
+                            backgroundColor: 'rgba(59, 130, 246, 0.85)',
+                            hoverBackgroundColor: 'rgba(59, 130, 246, 1)',
+                            borderRadius: 6,
+                        },
+                        {
+                            label: 'Total Ambilan Kasbon (Rp)',
+                            data: ambilanData,
+                            backgroundColor: 'rgba(244, 63, 94, 0.85)',
+                            hoverBackgroundColor: 'rgba(244, 63, 94, 1)',
+                            borderRadius: 6,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeInOutQuart'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { font: { family: 'Plus Jakarta Sans', size: 11, weight: 'bold' } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { 
+                                font: { family: 'Plus Jakarta Sans', size: 10 },
+                                callback: function(value) {
+                                    return 'Rp ' + value.toLocaleString('id-ID');
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: { font: { family: 'Plus Jakarta Sans', size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderIndividualEmployeeChart() {
+            const ctx = document.getElementById('chartIndividualKaryawan').getContext('2d');
+            const selectedKaryawanId = document.getElementById('dashSelectKaryawan').value;
+
+            if (individualChartInstance) {
+                individualChartInstance.destroy();
+            }
+
+            if (!selectedKaryawanId) {
+                return;
+            }
+
+            const k = store.karyawan.find(item => item.id === selectedKaryawanId);
+            if (!k) return;
+
+            const hariIni = new Date();
+            const tglMulai = new Date(k.tglKerja);
+            const diffTime = Math.abs(hariIni - tglMulai);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const gajiHarian = k.gaji / 30;
+            const totalAkumulasi = Math.round(diffDays * gajiHarian);
+
+            const totalAmbilan = store.ambilan
+                .filter(a => a.karyawanId === k.id)
+                .reduce((sum, item) => sum + Number(item.total), 0);
+
+            const sisaGaji = Math.max(0, totalAkumulasi - totalAmbilan);
+
+            individualChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Sisa Gaji Bersih', 'Total Ambilan'],
+                    datasets: [{
+                        data: [sisaGaji, totalAmbilan],
+                        backgroundColor: [
+                            'rgba(16, 185, 129, 0.85)',
+                            'rgba(244, 63, 94, 0.85)'
+                        ],
+                        hoverOffset: 8,
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 1400,
+                        easing: 'easeOutBack'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'Plus Jakarta Sans', size: 10, weight: 'bold' },
+                                padding: 12
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.label + ': Rp ' + context.raw.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        function renderOmsetHarianChart() {
+            const ctx = document.getElementById('chartOmsetHarian').getContext('2d');
+            const selectedMonth = document.getElementById('dashOmsetBulan').value;
+
+            if (omsetChartInstance) {
+                omsetChartInstance.destroy();
+            }
+
+            let filteredOmset = store.omset.filter(o => o.tanggal.startsWith(selectedMonth));
+            filteredOmset.sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+            const labels = filteredOmset.map(o => {
+                const dateParts = o.tanggal.split('-');
+                return `${dateParts[2]}/${dateParts[1]}`;
+            });
+
+            const dataMasuk = filteredOmset.map(o => o.masuk);
+            const dataKeluar = filteredOmset.map(o => o.keluar);
+            const dataSimpan = filteredOmset.map(o => o.simpan);
+
+            omsetChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Uang Masuk (Kolom 2)',
+                            data: dataMasuk,
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                            borderWidth: 3,
+                            tension: 0.3,
+                            fill: true,
+                            pointBackgroundColor: 'rgba(59, 130, 246, 1)'
+                        },
+                        {
+                            label: 'Keluar Hari Ini (Kolom 3)',
+                            data: dataKeluar,
+                            borderColor: 'rgba(244, 63, 94, 1)',
+                            backgroundColor: 'rgba(244, 63, 94, 0.03)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true,
+                            pointBackgroundColor: 'rgba(244, 63, 94, 1)'
+                        },
+                        {
+                            label: 'Simpan / Setor (Kolom 6)',
+                            data: dataSimpan,
+                            borderColor: 'rgba(124, 58, 237, 1)',
+                            backgroundColor: 'rgba(124, 58, 237, 0.03)',
+                            borderWidth: 2.5,
+                            tension: 0.3,
+                            fill: true,
+                            pointBackgroundColor: 'rgba(124, 58, 237, 1)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1600,
+                        easing: 'easeInOutCubic'
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { family: 'Plus Jakarta Sans', size: 10, weight: 'semibold' },
+                                boxWidth: 12
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.dataset.label + ': Rp ' + context.raw.toLocaleString('id-ID');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                font: { family: 'Plus Jakarta Sans', size: 9 },
+                                callback: function(value) {
+                                    return 'Rp ' + value.toLocaleString('id-ID');
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(226, 232, 240, 0.6)'
+                            }
+                        },
+                        x: {
+                            ticks: { font: { family: 'Plus Jakarta Sans', size: 9 } },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+
+        // === FILE UPLOAD & COMPRESSION (CANVAS COMPACTOR) ===
+        function handleFotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 120;
+                    const MAX_HEIGHT = 120;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    uploadedFotoBase64 = compressedBase64;
+
+                    const previewImg = document.getElementById('karyawanFotoPreview');
+                    previewImg.src = compressedBase64;
+                    previewImg.classList.remove('hidden');
+                    document.getElementById('karyawanFotoPlaceholder').classList.add('hidden');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+
+        // === RENDER MENU: KARYAWAN ===
+        function renderKaryawanTable() {
+            const tbody = document.getElementById('karyawanTableBody');
+            tbody.innerHTML = "";
+            const query = document.getElementById('searchKaryawan').value.toLowerCase();
+
+            const filteredKaryawan = store.karyawan.filter(k => 
+                k.nama.toLowerCase().includes(query) || k.id.toLowerCase().includes(query) || k.jabatan.toLowerCase().includes(query)
+            );
+
+            if(filteredKaryawan.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-xs text-slate-400">Data karyawan tidak ditemukan.</td></tr>`;
+                return;
+            }
+
+            filteredKaryawan.forEach(k => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-all";
+                
+                const srcFoto = k.foto ? k.foto : defaultAvatar;
+
+                tr.innerHTML = `
+                    <td class="py-4 px-6 font-bold text-slate-900">${k.id}</td>
+                    <td class="py-4 px-6 font-semibold">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full border border-slate-200 overflow-hidden bg-white shrink-0 shadow-sm flex items-center justify-center">
+                                <img src="${srcFoto}" class="w-full h-full object-cover" alt="${k.nama}">
+                            </div>
+                            <div>
+                                <p class="font-bold text-slate-900">${k.nama}</p>
+                                <p class="text-[10px] text-slate-400">ZMFRESHMART Staff</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-xs"><span class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full font-bold">${k.jabatan}</span></td>
+                    <td class="py-4 px-6 text-slate-500">${k.tglKerja}</td>
+                    <td class="py-4 px-6 font-bold text-slate-800">Rp ${Number(k.gaji).toLocaleString('id-ID')} /bln</td>
+                    <td class="py-4 px-6 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="editKaryawan('${k.id}')" title="Edit Karyawan" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteKaryawan('${k.id}')" title="Hapus Karyawan" class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openKaryawanModal() {
+            document.getElementById('karyawanForm').reset();
+            document.getElementById('karyawanEditId').value = "";
+            uploadedFotoBase64 = "";
+
+            document.getElementById('karyawanFotoPreview').src = "";
+            document.getElementById('karyawanFotoPreview').classList.add('hidden');
+            document.getElementById('karyawanFotoPlaceholder').classList.remove('hidden');
+
+            document.getElementById('karyawanModalTitle').textContent = "Tambah Karyawan Baru";
+            document.getElementById('karyawanFormId').readOnly = false;
+            document.getElementById('karyawanFormId').classList.remove('bg-slate-100', 'cursor-not-allowed');
+            document.getElementById('karyawanModal').classList.remove('hidden');
+        }
+
+        function closeKaryawanModal() {
+            document.getElementById('karyawanModal').classList.add('hidden');
+        }
+
+        function handleKaryawanSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('karyawanEditId').value;
+            const newK = {
+                id: document.getElementById('karyawanFormId').value.trim(),
+                nama: document.getElementById('karyawanFormNama').value.trim(),
+                jabatan: document.getElementById('karyawanFormJabatan').value.trim(),
+                tglKerja: document.getElementById('karyawanFormTglKerja').value,
+                gaji: Number(document.getElementById('karyawanFormGaji').value),
+                foto: uploadedFotoBase64
+            };
+
+            if (editId) {
+                const idx = store.karyawan.findIndex(k => k.id === editId);
+                if(idx !== -1) {
+                    if (!newK.foto) {
+                        newK.foto = store.karyawan[idx].foto || "";
+                    }
+                    store.karyawan[idx] = newK;
+                    showToast("Karyawan Diupdate", "Informasi karyawan sukses dimodifikasi.", "success");
+                }
+            } else {
+                if (store.karyawan.some(k => k.id === newK.id)) {
+                    showToast("ID Duplikat", "ID Karyawan sudah terpakai di database.", "error");
+                    return;
+                }
+                store.karyawan.push(newK);
+                showToast("Karyawan Ditambah", "Sukses mendaftarkan karyawan baru.", "success");
+            }
+
+            closeKaryawanModal();
+            pushDataToSheet();
+            renderKaryawanTable();
+        }
+
+        function editKaryawan(id) {
+            const k = store.karyawan.find(item => item.id === id);
+            if (!k) return;
+
+            document.getElementById('karyawanEditId').value = k.id;
+            document.getElementById('karyawanFormId').value = k.id;
+            document.getElementById('karyawanFormId').readOnly = true;
+            document.getElementById('karyawanFormId').classList.add('bg-slate-100', 'cursor-not-allowed');
+
+            document.getElementById('karyawanFormNama').value = k.nama;
+            document.getElementById('karyawanFormJabatan').value = k.jabatan;
+            document.getElementById('karyawanFormTglKerja').value = k.tglKerja;
+            document.getElementById('karyawanFormGaji').value = k.gaji;
+            uploadedFotoBase64 = k.foto || "";
+
+            if(k.foto) {
+                document.getElementById('karyawanFotoPreview').src = k.foto;
+                document.getElementById('karyawanFotoPreview').classList.remove('hidden');
+                document.getElementById('karyawanFotoPlaceholder').classList.add('hidden');
+            } else {
+                document.getElementById('karyawanFotoPreview').src = "";
+                document.getElementById('karyawanFotoPreview').classList.add('hidden');
+                document.getElementById('karyawanFotoPlaceholder').classList.remove('hidden');
+            }
+
+            document.getElementById('karyawanModalTitle').textContent = "Ubah Informasi Karyawan";
+            document.getElementById('karyawanModal').classList.remove('hidden');
+        }
+
+        function deleteKaryawan(id) {
+            const confirmation = confirm(`Apakah Anda yakin ingin menghapus data karyawan "${getKaryawanName(id)}"? Seluruh histori data terkait karyawan ini juga akan terhapus.`);
+            if (confirmation) {
+                store.karyawan = store.karyawan.filter(k => k.id !== id);
+                store.ambilan = store.ambilan.filter(a => a.karyawanId !== id);
+                store.users = store.users.filter(u => u.karyawanId !== id);
+
+                pushDataToSheet();
+                renderKaryawanTable();
+                showToast("Karyawan Terhapus", "Data karyawan dan catatan kasbon dibersihkan.", "success");
+            }
+        }
+
+
+        // === RENDER MENU: AMBILAN ===
+        function populateAmbilanDropdownKaryawan() {
+            const filterSelect = document.getElementById('filterAmbilanKaryawan');
+            const formSelect = document.getElementById('ambilanFormKaryawan');
+
+            filterSelect.innerHTML = `<option value="">Semua Karyawan</option>`;
+            formSelect.innerHTML = "";
+
+            store.karyawan.forEach(k => {
+                const opt = `<option value="${k.id}">${k.nama} (${k.id})</option>`;
+                filterSelect.innerHTML += opt;
+                formSelect.innerHTML += opt;
+            });
+        }
+
+        function renderAmbilanTable() {
+            const tbody = document.getElementById('ambilanTableBody');
+            tbody.innerHTML = "";
+            const filterKaryawanId = document.getElementById('filterAmbilanKaryawan').value;
+
+            let filteredAmbilan = store.ambilan;
+            if(filterKaryawanId) {
+                filteredAmbilan = store.ambilan.filter(a => a.karyawanId === filterKaryawanId);
+            }
+
+            filteredAmbilan.sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+            if(filteredAmbilan.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-xs text-slate-400">Belum ada riwayat ambilan untuk filter ini.</td></tr>`;
+                return;
+            }
+
+            filteredAmbilan.forEach(a => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-all";
+                tr.innerHTML = `
+                    <td class="py-4 px-6 font-semibold">${a.tanggal}</td>
+                    <td class="py-4 px-6 font-bold text-slate-800">${getKaryawanName(a.karyawanId)}</td>
+                    <td class="py-4 px-6 text-slate-500">${a.keterangan}</td>
+                    <td class="py-4 px-6 font-extrabold text-rose-600">Rp ${Number(a.total).toLocaleString('id-ID')}</td>
+                    <td class="py-4 px-6 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="editAmbilan('${a.id}')" title="Edit Ambilan" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteAmbilan('${a.id}')" title="Hapus Ambilan" class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAmbilanModal() {
+            document.getElementById('ambilanForm').reset();
+            document.getElementById('ambilanEditId').value = "";
+            document.getElementById('ambilanFormTanggal').value = new Date().toISOString().substring(0, 10);
+            document.getElementById('ambilanModalTitle').textContent = "Catat Transaksi Ambilan Karyawan";
+            document.getElementById('ambilanModal').classList.remove('hidden');
+        }
+
+        function closeAmbilanModal() {
+            document.getElementById('ambilanModal').classList.add('hidden');
+        }
+
+        function handleAmbilanSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('ambilanEditId').value;
+            const newA = {
+                id: editId || "A-" + Date.now(),
+                karyawanId: document.getElementById('ambilanFormKaryawan').value,
+                tanggal: document.getElementById('ambilanFormTanggal').value,
+                keterangan: document.getElementById('ambilanFormKeterangan').value.trim(),
+                total: Number(document.getElementById('ambilanFormTotal').value)
+            };
+
+            if (editId) {
+                const idx = store.ambilan.findIndex(a => a.id === editId);
+                if (idx !== -1) {
+                    store.ambilan[idx] = newA;
+                    showToast("Ambilan Terubah", "Data catatan kasbon berhasil disesuaikan.", "success");
+                }
+            } else {
+                store.ambilan.push(newA);
+                showToast("Ambilan Disimpan", "Kasbon karyawan berhasil dicatatkan.", "success");
+            }
+
+            closeAmbilanModal();
+            pushDataToSheet();
+            renderAmbilanTable();
+        }
+
+        // Edit Data Ambilan
+        function editAmbilan(id) {
+            const a = store.ambilan.find(item => item.id === id);
+            if (!a) return;
+
+            document.getElementById('ambilanEditId').value = a.id;
+            document.getElementById('ambilanFormKaryawan').value = a.karyawanId;
+            document.getElementById('ambilanFormTanggal').value = a.tanggal;
+            document.getElementById('ambilanFormKeterangan').value = a.keterangan;
+            document.getElementById('ambilanFormTotal').value = a.total;
+
+            document.getElementById('ambilanModalTitle').textContent = "Edit Catatan Ambilan";
+            document.getElementById('ambilanModal').classList.remove('hidden');
+        }
+
+        function deleteAmbilan(id) {
+            const confirmation = confirm("Hapus transaksi ambilan ini?");
+            if (confirmation) {
+                store.ambilan = store.ambilan.filter(item => item.id !== id);
+                pushDataToSheet();
+                renderAmbilanTable();
+                showToast("Ambilan Terhapus", "Transaksi kasbon dihapus dari pembukuan.", "success");
+            }
+        }
+
+
+        // === RENDER MENU: LAPORAN GAJI & SLIP PRINT ===
+        function renderLaporanSection() {
+            const filterDropdown = document.getElementById('laporanFilterKaryawan');
+            filterDropdown.innerHTML = "";
+
+            if(currentUser && currentUser.role === 'karyawan') {
+                const myKaryawan = store.karyawan.filter(k => k.id === currentUser.karyawanId);
+                myKaryawan.forEach(k => {
+                    filterDropdown.innerHTML += `<option value="${k.id}">${k.nama} (${k.id})</option>`;
+                });
+                document.getElementById('laporanFilterKaryawan').disabled = true;
+            } else {
+                document.getElementById('laporanFilterKaryawan').disabled = false;
+                store.karyawan.forEach(k => {
+                    filterDropdown.innerHTML += `<option value="${k.id}">${k.nama} (${k.id})</option>`;
+                });
+            }
+
+            calculateAndRenderSlip();
+        }
+
+        function handleLaporanFilterChange() {
+            calculateAndRenderSlip();
+        }
+
+        function calculateAndRenderSlip() {
+            const selectedId = document.getElementById('laporanFilterKaryawan').value;
+            const targetTglInput = document.getElementById('laporanSampaiTanggal').value;
+            
+            if(!selectedId) {
+                showToast("Error", "Karyawan tidak valid.", "error");
+                return;
+            }
+
+            const k = store.karyawan.find(item => item.id === selectedId);
+            if(!k) return;
+
+            const tglAkhir = new Date(targetTglInput || new Date());
+            const tglMulai = new Date(k.tglKerja);
+
+            let diffDays = 0;
+            if (tglAkhir >= tglMulai) {
+                const diffTime = Math.abs(tglAkhir - tglMulai);
+                diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+            } else {
+                diffDays = 0;
+            }
+
+            const gajiHarian = k.gaji / 30;
+            const totalAkumulasiGaji = diffDays * gajiHarian;
+
+            const listAmbilan = store.ambilan.filter(a => a.karyawanId === selectedId && new Date(a.tanggal) <= tglAkhir);
+            const totalAmbilan = listAmbilan.reduce((sum, item) => sum + Number(item.total), 0);
+
+            const sisaGajiBersih = totalAkumulasiGaji - totalAmbilan;
+
+            // Foto Karyawan di Slip Gaji
+            document.getElementById('printFotoKaryawan').src = k.foto ? k.foto : defaultAvatar;
+
+            document.getElementById('printSlipID').textContent = `ID Karyawan: ${k.id}`;
+            document.getElementById('printGenerateDate').textContent = `Periode s.d.: ${tglAkhir.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}`;
+            
+            document.getElementById('printNamaKaryawan').textContent = k.nama;
+            document.getElementById('printJabatanKaryawan').textContent = k.jabatan;
+            document.getElementById('printTglMulaiKaryawan').textContent = tglMulai.toLocaleDateString('id-ID');
+            document.getElementById('printMasaKerja').textContent = `${diffDays} Hari`;
+
+            document.getElementById('printTotalGajiAkumulasi').textContent = "Rp " + Math.round(totalAkumulasiGaji).toLocaleString('id-ID');
+            document.getElementById('printHitunganGajiInfo').textContent = `${diffDays} hari aktif x Rp ${Math.round(gajiHarian).toLocaleString('id-ID')}/hari`;
+            
+            document.getElementById('printTotalPotonganAmbilan').textContent = "Rp " + Math.round(totalAmbilan).toLocaleString('id-ID');
+            document.getElementById('printSisaGajiBersih').textContent = "Rp " + Math.round(sisaGajiBersih).toLocaleString('id-ID');
+            document.getElementById('printTtdNamaKaryawan').textContent = k.nama;
+
+            const printHistoryBody = document.getElementById('printHistoryAmbilanBody');
+            printHistoryBody.innerHTML = "";
+
+            if(listAmbilan.length === 0) {
+                printHistoryBody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-[11px] text-slate-400 italic">Bersih (Tidak memiliki catatan ambilan).</td></tr>`;
+            } else {
+                listAmbilan.forEach(a => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="py-2.5 px-4">${a.tanggal}</td>
+                        <td class="py-2.5 px-4">${a.keterangan}</td>
+                        <td class="py-2.5 px-4 text-right font-bold text-rose-600">-Rp ${Number(a.total).toLocaleString('id-ID')}</td>
+                    `;
+                    printHistoryBody.appendChild(tr);
+                });
+            }
+        }
+
+        function printSlipGaji() {
+            window.print();
+        }
+
+
+        // === RENDER MENU: OMSET HARIAN ===
+        function renderOmsetTable() {
+            const tbody = document.getElementById('omsetTableBody');
+            tbody.innerHTML = "";
+
+            const filterInput = document.getElementById('filterOmsetBulan');
+            if(!filterInput.value) {
+                filterInput.value = new Date().toISOString().substring(0, 7);
+            }
+
+            const currentSelectedMonth = filterInput.value;
+
+            let filteredOmset = store.omset.filter(o => o.tanggal.startsWith(currentSelectedMonth));
+            filteredOmset.sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+            if(filteredOmset.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-xs text-slate-400">Belum ada pencatatan omset di bulan ${currentSelectedMonth}.</td></tr>`;
+                return;
+            }
+
+            filteredOmset.forEach(o => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-all";
+                tr.innerHTML = `
+                    <td class="py-4 px-6 font-semibold">${o.tanggal}</td>
+                    <td class="py-4 px-6 font-medium text-slate-700">Rp ${Number(o.bakiSemalam).toLocaleString('id-ID')}</td>
+                    <td class="py-4 px-6 font-medium text-rose-600">-Rp ${Number(o.keluar).toLocaleString('id-ID')}</td>
+                    <td class="py-4 px-6 font-semibold text-emerald-600">Rp ${Number(o.cashMoney).toLocaleString('id-ID')}</td>
+                    <td class="py-4 px-6 font-extrabold text-blue-600">Rp ${Number(o.masuk).toLocaleString('id-ID')}</td>
+                    <td class="py-4 px-6 font-medium text-indigo-600">Rp ${Number(o.simpan).toLocaleString('id-ID')}</td>
+                    <td class="py-4 px-6 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="editOmset('${o.id}')" title="Edit Omset" class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteOmset('${o.id}')" title="Hapus Omset" class="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openOmsetModal() {
+            document.getElementById('omsetForm').reset();
+            document.getElementById('omsetEditId').value = "";
+            document.getElementById('omsetFormTanggal').value = new Date().toISOString().substring(0, 10);
+            document.getElementById('omsetModalTitle').textContent = "Input Catatan Omset Baru";
+            
+            calculateBakiSemalam();
+            document.getElementById('omsetModal').classList.remove('hidden');
+        }
+
+        function closeOmsetModal() {
+            document.getElementById('omsetModal').classList.add('hidden');
+        }
+
+        function calculateBakiSemalam() {
+            const inputTgl = document.getElementById('omsetFormTanggal').value;
+            if(!inputTgl) return;
+
+            const inputDateObj = new Date(inputTgl);
+            inputDateObj.setDate(inputDateObj.getDate() - 1);
+            const tglKemarinStr = inputDateObj.toISOString().substring(0, 10);
+
+            const omsetYesterday = store.omset.find(o => o.tanggal === tglKemarinStr);
+
+            let calculatedBaki = 0;
+            if(omsetYesterday) {
+                calculatedBaki = Number(omsetYesterday.cashMoney) - Number(omsetYesterday.simpan);
+            }
+
+            document.getElementById('omsetFormBakiSemalam').value = calculatedBaki;
+            calculateMasukField();
+        }
+
+        function calculateMasukField() {
+            const bakiSemalam = Number(document.getElementById('omsetFormBakiSemalam').value) || 0;
+            const keluar = Number(document.getElementById('omsetFormKeluar').value) || 0;
+            const cashMoney = Number(document.getElementById('omsetFormCashMoney').value) || 0;
+
+            const masuk = (cashMoney + keluar) - bakiSemalam;
+            document.getElementById('omsetFormMasuk').value = masuk;
+        }
+
+        function handleOmsetSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('omsetEditId').value;
+            const newOmset = {
+                id: editId || "O-" + Date.now(),
+                tanggal: document.getElementById('omsetFormTanggal').value,
+                bakiSemalam: Number(document.getElementById('omsetFormBakiSemalam').value) || 0,
+                keluar: Number(document.getElementById('omsetFormKeluar').value) || 0,
+                cashMoney: Number(document.getElementById('omsetFormCashMoney').value) || 0,
+                masuk: Number(document.getElementById('omsetFormMasuk').value) || 0,
+                simpan: Number(document.getElementById('omsetFormSimpan').value) || 0
+            };
+
+            if (editId) {
+                const idx = store.omset.findIndex(o => o.id === editId);
+                if (idx !== -1) {
+                    store.omset[idx] = newOmset;
+                    showToast("Omset Diubah", "Berhasil mengubah buku kas harian.", "success");
+                }
+            } else {
+                if (store.omset.some(o => o.tanggal === newOmset.tanggal)) {
+                    showToast("Tanggal Duplikat", "Omset pada tanggal ini sudah dicatat. Silakan edit data yang sudah ada.", "error");
+                    return;
+                }
+                store.omset.push(newOmset);
+                showToast("Omset Dicatat", "Berhasil mencatat keuangan hari ini.", "success");
+            }
+
+            closeOmsetModal();
+            pushDataToSheet();
+            renderOmsetTable();
+        }
+
+        function editOmset(id) {
+            const o = store.omset.find(item => item.id === id);
+            if (!o) return;
+
+            document.getElementById('omsetEditId').value = o.id;
+            document.getElementById('omsetFormTanggal').value = o.tanggal;
+            document.getElementById('omsetFormBakiSemalam').value = o.bakiSemalam;
+            document.getElementById('omsetFormKeluar').value = o.keluar;
+            document.getElementById('omsetFormCashMoney').value = o.cashMoney;
+            document.getElementById('omsetFormMasuk').value = o.masuk;
+            document.getElementById('omsetFormSimpan').value = o.simpan;
+
+            document.getElementById('omsetModalTitle').textContent = "Edit Catatan Omset";
+            document.getElementById('omsetModal').classList.remove('hidden');
+        }
+
+        function deleteOmset(id) {
+            const confirmation = confirm("Hapus data omset harian ini?");
+            if (confirmation) {
+                store.omset = store.omset.filter(item => item.id !== id);
+                pushDataToSheet();
+                renderOmsetTable();
+                showToast("Omset Terhapus", "Data omset harian dihapus.", "success");
+            }
+        }
+
+
+        // === RENDER MENU: SETTINGS & USERS ===
+        function renderSettings() {
+            document.getElementById('settingScriptUrl').value = store.settings.scriptUrl || "";
+
+            const userKaryawanSelect = document.getElementById('userFormKaryawan');
+            userKaryawanSelect.innerHTML = "";
+            store.karyawan.forEach(k => {
+                userKaryawanSelect.innerHTML += `<option value="${k.id}">${k.nama}</option>`;
+            });
+
+            const tbody = document.getElementById('userTableBody');
+            tbody.innerHTML = "";
+
+            store.users.forEach(u => {
+                const isSystemAdmin = u.username === 'admin';
+                const actionHtml = isSystemAdmin 
+                    ? `<span class="text-slate-400 text-[10px]">Akses Sistem</span>`
+                    : `<button onclick="deleteUser('${u.username}')" class="p-1.5 text-rose-600 hover:bg-rose-50 rounded-lg transition-all"><i class="fa-solid fa-user-minus"></i></button>`;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-slate-800">${u.username}</td>
+                    <td class="py-3 px-4 font-semibold text-blue-600">${u.role === 'admin' ? 'Admin' : getKaryawanName(u.karyawanId)}</td>
+                    <td class="py-3 px-4 text-slate-400 font-mono">••••••••</td>
+                    <td class="py-3 px-4 text-center">${actionHtml}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function saveSettings() {
+            const url = document.getElementById('settingScriptUrl').value.trim();
+            store.settings.scriptUrl = url;
+            saveToLocalStorage();
+            
+            showToast("Konfigurasi Disimpan", "Sistem akan segera beralih mengubungkan data ke Sheets cloud.", "success");
+            syncDataFromSheet();
+        }
+
+        function openUserModal() {
+            document.getElementById('userForm').reset();
+            document.getElementById('userModal').classList.remove('hidden');
+        }
+
+        function closeUserModal() {
+            document.getElementById('userModal').classList.add('hidden');
+        }
+
+        function handleUserSubmit(e) {
+            e.preventDefault();
+            const username = document.getElementById('userFormUsername').value.trim().toLowerCase();
+            const pass = document.getElementById('userFormPassword').value.trim();
+            const karyawanId = document.getElementById('userFormKaryawan').value;
+
+            if(store.users.some(u => u.username === username)) {
+                showToast("User Sudah Ada", "Username sudah digunakan.", "error");
+                return;
+            }
+
+            store.users.push({
+                username: username,
+                password: pass,
+                role: "karyawan",
+                karyawanId: karyawanId
+            });
+
+            closeUserModal();
+            pushDataToSheet();
+            renderSettings();
+            showToast("User Ditambahkan", "User akun baru sukses dibuat.", "success");
+        }
+
+        function deleteUser(username) {
+            if (confirm(`Yakin ingin menghapus akses login untuk user "${username}"?`)) {
+                store.users = store.users.filter(u => u.username !== username);
+                pushDataToSheet();
+                renderSettings();
+                showToast("User Dihapus", "Akses login karyawan dinonaktifkan.", "success");
+            }
+        }
+    </script>
+</body>
+</html>
